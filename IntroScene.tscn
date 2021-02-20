@@ -1,0 +1,91 @@
+[gd_scene load_steps=11 format=2]
+
+[ext_resource path="res://PlayerCamera.gd" type="Script" id=1]
+[ext_resource path="res://addons/SIsilicon.vfx.lens flare/lens-flare.gd" type="Script" id=3]
+[ext_resource path="res://addons/SIsilicon.vfx.lens flare/lens-dirt-default.jpeg" type="Texture" id=4]
+[ext_resource path="res://SkyboxScene.tscn" type="PackedScene" id=5]
+
+[sub_resource type="CapsuleShape" id=1]
+height = 1.8
+
+[sub_resource type="BoxShape" id=2]
+
+[sub_resource type="CubeMesh" id=3]
+
+[sub_resource type="ViewportTexture" id=4]
+viewport_path = NodePath("WorldEnvironment/BgContainer/Background")
+
+[sub_resource type="PanoramaSky" id=5]
+resource_local_to_scene = true
+panorama = SubResource( 4 )
+
+[sub_resource type="Environment" id=6]
+background_mode = 4
+background_sky = SubResource( 5 )
+
+[node name="Spatial" type="Spatial"]
+
+[node name="Sunlight" type="DirectionalLight" parent="."]
+
+[node name="RigidBody" type="RigidBody" parent="."]
+
+[node name="CollisionShape" type="CollisionShape" parent="RigidBody"]
+transform = Transform( 1, 0, 0, 0, -1.62921e-07, -1, 0, 1, -1.62921e-07, 0, 0, 0 )
+shape = SubResource( 1 )
+
+[node name="CamBase" type="Spatial" parent="RigidBody/CollisionShape"]
+transform = Transform( 1, 0, 0, 0, -1.62921e-07, 0.999999, 0, -0.999999, -1.62921e-07, 0, -2.84217e-14, -1 )
+
+[node name="PlayerCam" type="Camera" parent="RigidBody/CollisionShape/CamBase"]
+current = true
+fov = 90.0
+script = ExtResource( 1 )
+
+[node name="SpotLight" type="SpotLight" parent="RigidBody/CollisionShape/CamBase/PlayerCam"]
+visible = false
+spot_range = 20.0
+spot_angle = 30.0
+
+[node name="RigidBody2" type="RigidBody" parent="."]
+transform = Transform( 0.873492, -0.220081, -0.434254, 0, 0.891987, -0.452061, 0.486839, 0.394872, 0.779143, 0, 0, -7.284 )
+
+[node name="CollisionShape" type="CollisionShape" parent="RigidBody2"]
+shape = SubResource( 2 )
+
+[node name="MeshInstance" type="MeshInstance" parent="RigidBody2/CollisionShape"]
+mesh = SubResource( 3 )
+material/0 = null
+
+[node name="LensFlare" type="Node" parent="."]
+script = ExtResource( 3 )
+flareStrength = 10.0
+flareBias = 1.05
+flareBlur = 2.0
+distortionQuality = 0
+distortion = 2.0
+ghostCount = 7
+ghostSpacing = 0.3
+haloWidth = 0.25
+lensDirt = ExtResource( 4 )
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource( 6 )
+
+[node name="BgContainer" type="ViewportContainer" parent="WorldEnvironment"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+mouse_filter = 2
+stretch = true
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Background" type="Viewport" parent="WorldEnvironment/BgContainer"]
+size = Vector2( 1024, 600 )
+own_world = true
+handle_input_locally = false
+render_target_update_mode = 3
+
+[node name="Root" parent="WorldEnvironment/BgContainer/Background" instance=ExtResource( 5 )]
+camera_path = NodePath("../../../../RigidBody/CollisionShape/CamBase/PlayerCam")
+light_path = NodePath("../../../../Sunlight")
